@@ -1,13 +1,14 @@
 import { Response, Request } from "express";
+import mongoose from "mongoose";
+import excelJs from "exceljs";
 
-import companyDetailsModel from "../models/companyDetails.model";
+import companyModel from "../models/company.model";
 import catchAsync from "../utils/errorHandling/catchAsync.utils";
 import ExpressResponse from "../libs/express/response.libs";
+import MailService from "../utils/mailService.utils";
 
-import excelJs from "exceljs";
-import { companyDetailsType } from "interfaces/models/companyDetails.types";
-import { addCompanyType } from "validations/company";
-import mongoose from "mongoose";
+import { companyDetailsType } from "../interfaces/models/companyDetails.types";
+import { addCompanyType } from "../validations/company";
 
 class companyController {
   public feedCompanyFromExcelToDB = catchAsync(
@@ -51,7 +52,7 @@ class companyController {
         });
       }
 
-      await companyDetailsModel.insertMany(companies);
+      await companyModel.insertMany(companies);
 
       ExpressResponse.success(res, "File uploaded", {
         companies,
@@ -93,7 +94,7 @@ class companyController {
     const limit = parseInt(req.query.limit as string) as number;
     const search = req.query.search as string;
 
-    const companies = await companyDetailsModel
+    const companies = await companyModel
       .find({
         $or: [
           { companyName: { $regex: search, $options: "i" } },
@@ -105,7 +106,7 @@ class companyController {
       .limit(limit)
       .skip((page - 1) * limit);
 
-    const totalCompanies = await companyDetailsModel.countDocuments({
+    const totalCompanies = await companyModel.countDocuments({
       $or: [
         { companyName: { $regex: search, $options: "i" } },
         { email: { $regex: search, $options: "i" } },
@@ -123,7 +124,7 @@ class companyController {
   public addCompany = catchAsync(async (req: Request, res: Response) => {
     const company = req.body as addCompanyType;
 
-    await companyDetailsModel.create(company);
+    await companyModel.create(company);
 
     ExpressResponse.accepted(res, "Company added");
   });
@@ -134,9 +135,35 @@ class companyController {
     if (!id) return ExpressResponse.badRequest(res, "Id is required");
     if (mongoose.Types.ObjectId.isValid(id) === false)
       return ExpressResponse.badRequest(res, "Invalid id");
-    await companyDetailsModel.findByIdAndDelete(id);
+    await companyModel.findByIdAndDelete(id);
 
     ExpressResponse.accepted(res, "Company deleted");
+  });
+
+  public sendBulkMail = catchAsync(async (req: Request, res: Response) => {
+    const pendingCompanies = await companyModel.find({ isSent: false });
+    const mailService = new MailService();
+
+    // for (const company of pendingCompanies) {
+    //   await mailService.sendMail(
+    //     company.email,
+    //     "Test mail",
+    //     `Hello ${company.name}, This is a test mail`
+    //   );
+
+    //   await companyModel.findByIdAndUpdate(company._id, {
+    //     isSent: true,
+    //     sendDate: new Date(),
+    //   });
+    // }
+
+    const result = await mailService.sendMail(
+      "niklausmike0987@gmail.com",
+      "Passionate Software Developer Eager to Contribute",
+      "<p>king</p>"
+    );
+
+    ExpressResponse.success(res, "Mail sent", result);
   });
 }
 

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import companyDetailsType from "../interfaces/models/companyDetails.types";
 
-const companyDetailsSchema = new mongoose.Schema<companyDetailsType>(
+const companySchema = new mongoose.Schema<companyDetailsType>(
   {
     companyName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
@@ -13,7 +13,4 @@ const companyDetailsSchema = new mongoose.Schema<companyDetailsType>(
   { timestamps: true }
 );
 
-export default mongoose.model<companyDetailsType>(
-  "companyDetails",
-  companyDetailsSchema
-);
+export default mongoose.model<companyDetailsType>("company", companySchema);

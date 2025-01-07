@@ -11,7 +11,7 @@ class NodeMailerService {
     },
   });
 
-  public async sendMail(to: string, subject: string, text: string) {
+  public async sendMail(to: string, subject: string, html: string) {
     const mailOptions = {
       from: {
         name: String(process.env.MAIL_USER),
@@ -19,7 +19,7 @@ class NodeMailerService {
       },
       to,
       subject,
-      text,
+      html,
     };
 
     return this.transporter.sendMail(mailOptions);

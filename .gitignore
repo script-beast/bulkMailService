@@ -25,3 +25,5 @@ yarn-error.log*
 
 .env
 .env_Prod
+
+*.html

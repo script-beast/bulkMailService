@@ -15,8 +15,12 @@ router.post(
 
 router.get("/get-excel-template", companyController.getExcelTemplate);
 
-router.post("/add-company", validate(addCompany), companyController.addCompany);
+router.post("/", validate(addCompany), companyController.addCompany);
 
-router.get("/get-companies", companyController.getCompanies);
+router.get("/", companyController.getCompanies);
+
+router.delete("/:id", companyController.deleteCompany);
+
+router.get("/send-bulk-email", companyController.sendBulkMail);
 
 export default router;
